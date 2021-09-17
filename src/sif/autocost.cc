@@ -560,8 +560,11 @@ Cost AutoCost::TransitionCost(const baldr::DirectedEdge* edge,
   Cost c = base_transition_cost(node, edge, &pred, idx);
   c.secs = OSRMCarTurnDuration(edge, node, pred.opp_local_idx());
 
+  bool is_hov_transition = (!pred.is_hov_only() && edge->is_hov_only());
+  bool is_hov_link = (pred.link() && pred.is_hov_only() && edge->is_hov_only());
+
   // Transition time = turncost * stopimpact * densityfactor
-  if (edge->stopimpact(idx) > 0 && !shortest_) {
+  if (edge->stopimpact(idx) > 0 && !shortest_ && !is_hov_transition && !is_hov_link) {
     float turn_cost;
     if (edge->edge_to_right(idx) && edge->edge_to_left(idx)) {
       turn_cost = kTCCrossing;
@@ -628,8 +631,11 @@ Cost AutoCost::TransitionCostReverse(const uint32_t idx,
   Cost c = base_transition_cost(node, edge, pred, idx);
   c.secs = OSRMCarTurnDuration(edge, node, pred->opp_local_idx());
 
+  bool is_hov_transition = (pred->is_hov_only() && !edge->is_hov_only());
+  bool is_hov_link = (edge->link() && pred->is_hov_only() && edge->is_hov_only());
+
   // Transition time = turncost * stopimpact * densityfactor
-  if (edge->stopimpact(idx) > 0 && !shortest_) {
+  if (edge->stopimpact(idx) > 0 && !shortest_ && !is_hov_transition && !is_hov_link) {
     float turn_cost;
     if (edge->edge_to_right(idx) && edge->edge_to_left(idx)) {
       turn_cost = kTCCrossing;
